@@ -192,6 +192,9 @@
                     <url>${db.url}</url>
                     <username>${db.username}</username>
                     <password>${db.password}</password>
+                    <referenceUrl>${db.url}</referenceUrl>
+                    <referenceUsername>${db.username}</referenceUsername>
+                    <referencePassword>${db.password}</referencePassword>
                     <changeLogFile>src/main/resources/db/changelog/db.changelog-master.yaml</changeLogFile>
                     <outputChangeLogFile>src/main/resources/db/changelog/db.changelog-master.yaml</outputChangeLogFile>
                 </configuration>
