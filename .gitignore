@@ -4,6 +4,9 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
+src/main/resources/config/private.properties
+
+
 ### STS ###
 .apt_generated
 .classpath
@@ -31,4 +34,3 @@ build/
 
 ### VS Code ###
 .vscode/
-private.properties
