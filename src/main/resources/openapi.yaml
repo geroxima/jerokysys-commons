@@ -54,6 +54,9 @@ components:
             birthDate:
               type: string
               format: date
+            guardianId:
+              type: integer
+              format: int64
 
           required:
             - birthDate
@@ -185,8 +188,7 @@ components:
           type: number
 
         status:
-          type: string
-          maxLength: 20
+          $ref: '#/components/schemas/EnrollmentStatus'
 
       required:
         - studentId
