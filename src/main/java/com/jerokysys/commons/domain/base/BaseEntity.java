@@ -23,4 +23,10 @@ public abstract class BaseEntity {
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
+
+    @Column(nullable = false, columnDefinition = "boolean default true")
+    private Boolean active = true;
+
+    @Column(nullable = false, columnDefinition = "boolean default false")
+    private Boolean deleted = false;
 }
