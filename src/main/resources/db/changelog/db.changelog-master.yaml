@@ -285,3 +285,36 @@ databaseChangeLog:
               - column: { name: description, type: varchar(255), constraints: { nullable: false } }
               - column: { name: amount, type: "numeric(10,2)", constraints: { nullable: false } }
               - column: { name: created_at, type: timestamp, constraints: { nullable: false } }
+
+  # 3. Borrado logico: columnas active/deleted para toda entidad que hereda BaseEntity
+  - changeSet:
+      id: 14-add-soft-delete-columns
+      author: alan
+      changes:
+        - sql:
+            splitStatements: true
+            sql: |
+              ALTER TABLE guardians ADD COLUMN IF NOT EXISTS active boolean NOT NULL DEFAULT true;
+              ALTER TABLE guardians ADD COLUMN IF NOT EXISTS deleted boolean NOT NULL DEFAULT false;
+              ALTER TABLE instructors ADD COLUMN IF NOT EXISTS active boolean NOT NULL DEFAULT true;
+              ALTER TABLE instructors ADD COLUMN IF NOT EXISTS deleted boolean NOT NULL DEFAULT false;
+              ALTER TABLE disciplines ADD COLUMN IF NOT EXISTS active boolean NOT NULL DEFAULT true;
+              ALTER TABLE disciplines ADD COLUMN IF NOT EXISTS deleted boolean NOT NULL DEFAULT false;
+              ALTER TABLE students ADD COLUMN IF NOT EXISTS active boolean NOT NULL DEFAULT true;
+              ALTER TABLE students ADD COLUMN IF NOT EXISTS deleted boolean NOT NULL DEFAULT false;
+              ALTER TABLE classes ADD COLUMN IF NOT EXISTS active boolean NOT NULL DEFAULT true;
+              ALTER TABLE classes ADD COLUMN IF NOT EXISTS deleted boolean NOT NULL DEFAULT false;
+              ALTER TABLE enrollments ADD COLUMN IF NOT EXISTS active boolean NOT NULL DEFAULT true;
+              ALTER TABLE enrollments ADD COLUMN IF NOT EXISTS deleted boolean NOT NULL DEFAULT false;
+              ALTER TABLE invoices ADD COLUMN IF NOT EXISTS active boolean NOT NULL DEFAULT true;
+              ALTER TABLE invoices ADD COLUMN IF NOT EXISTS deleted boolean NOT NULL DEFAULT false;
+              ALTER TABLE invoice_details ADD COLUMN IF NOT EXISTS active boolean NOT NULL DEFAULT true;
+              ALTER TABLE invoice_details ADD COLUMN IF NOT EXISTS deleted boolean NOT NULL DEFAULT false;
+              ALTER TABLE exams ADD COLUMN IF NOT EXISTS active boolean NOT NULL DEFAULT true;
+              ALTER TABLE exams ADD COLUMN IF NOT EXISTS deleted boolean NOT NULL DEFAULT false;
+              ALTER TABLE exam_results ADD COLUMN IF NOT EXISTS active boolean NOT NULL DEFAULT true;
+              ALTER TABLE exam_results ADD COLUMN IF NOT EXISTS deleted boolean NOT NULL DEFAULT false;
+              ALTER TABLE instructor_payments ADD COLUMN IF NOT EXISTS active boolean NOT NULL DEFAULT true;
+              ALTER TABLE instructor_payments ADD COLUMN IF NOT EXISTS deleted boolean NOT NULL DEFAULT false;
+              ALTER TABLE instructor_payment_details ADD COLUMN IF NOT EXISTS active boolean NOT NULL DEFAULT true;
+              ALTER TABLE instructor_payment_details ADD COLUMN IF NOT EXISTS deleted boolean NOT NULL DEFAULT false;
