@@ -58,10 +58,13 @@ spring:
   jpa:
     hibernate:
       ddl-auto: validate
-  liquibase:
-    enabled: true
-    change-log: classpath:db/changelog/db.changelog-master.yaml
 ```
+
+The database is shared across all microservices. Do not run Liquibase here.
+One migration owner — this library's `liquibase` Maven profile, or a CI step
+calling `liquibase:update` — applies changesets. Services only validate at boot
+via `ddl-auto: validate`; a mismatch fails fast instead of racing on schema
+version.
 
 The microservice must scan the shared classes, because their packages differ
 from the application package:
@@ -74,10 +77,127 @@ from the application package:
 Component scanning must cover `com.jerokysys` (generated controllers live in
 `com.jerokysys.controller`).
 
+## Map DTOs to entities
+
+`BaseService` requires `toEntity(D)` and `toDto(E)` for every resource. Implement
+them in the microservice with MapStruct.
+
+Add MapStruct to the microservice `pom.xml`:
+
+```xml
+<properties>
+    <org.mapstruct.version>1.6.3</org.mapstruct.version>
+</properties>
+
+<dependency>
+    <groupId>org.mapstruct</groupId>
+    <artifactId>mapstruct</artifactId>
+    <version>${org.mapstruct.version}</version>
+</dependency>
+```
+
+Configure the compiler annotation processors. Order matters:
+
+```xml
+<plugin>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-compiler-plugin</artifactId>
+    <configuration>
+        <annotationProcessorPaths>
+            <path>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+            </path>
+            <path>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok-mapstruct-binding</artifactId>
+                <version>0.2.0</version>
+            </path>
+            <path>
+                <groupId>org.mapstruct</groupId>
+                <artifactId>mapstruct-processor</artifactId>
+                <version>${org.mapstruct.version}</version>
+            </path>
+        </annotationProcessorPaths>
+    </configuration>
+</plugin>
+```
+
+Without `lombok-mapstruct-binding` MapStruct runs before Lombok has generated the
+getters and setters, and every mapped field comes out null.
+
+Write one abstract mapper per entity. Use an abstract class when the mapper must
+resolve a relation (`guardianId` to `Guardian`):
+
+```java
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
+public abstract class StudentMapper {
+
+    @Autowired
+    protected GuardianRepository guardianRepository;
+
+    @Mapping(target = "guardianId", source = "guardian.id")
+    public abstract StudentDTO toDto(Student entity);
+
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "guardian", ignore = true)
+    public abstract Student toEntity(StudentDTO dto);
+
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "guardian", ignore = true)
+    public abstract void updateEntity(StudentDTO dto, @MappingTarget Student entity);
+
+    @AfterMapping
+    protected void linkGuardian(StudentDTO dto, @MappingTarget Student entity) {
+        if (dto.getGuardianId() != null) {
+            entity.setGuardian(guardianRepository.getReferenceById(dto.getGuardianId()));
+        }
+    }
+}
+```
+
+`unmappedTargetPolicy = IGNORE` suppresses warnings for entity fields absent from
+the DTO (`createdAt`, `active`, `deleted`).
+
+Delegate from the service:
+
+```java
+@Override
+public StudentDTO toDto(Student entity) {
+    return mapper.toDto(entity);
+}
+
+@Override
+public Student toEntity(StudentDTO dto) {
+    return mapper.toEntity(dto);
+}
+
+@Override
+public StudentDTO create(StudentDTO dto) {
+    return mapper.toDto(repository.save(mapper.toEntity(dto)));
+}
+
+@Override
+public StudentDTO update(Long id, StudentDTO dto) {
+    Student entity = repository.findById(id)
+            .orElseThrow(() -> new BusinessException("ENTITY_NOT_FOUND", "Entity not found with id: " + id));
+    mapper.updateEntity(dto, entity);
+    return mapper.toDto(repository.save(entity));
+}
+```
+
+Rules:
+
+- Map inside a transaction; lazy relations such as `guardian` fail outside one.
+- `search` must add a specification `deleted = false`. `getById` and `getAll`
+  do not filter soft-deleted rows.
+- Ignore the DTO `id` on create; the database assigns it.
+
 ## Liquibase migrations
 
-Database commands run through the `liquibase` Maven profile. This profile reads
-credentials from `src/main/resources/config/private.properties`.
+The shared database is migrated from this library only, never from a
+microservice. Database commands run through the `liquibase` Maven profile. This
+profile reads credentials from `src/main/resources/config/private.properties`.
 
 Setup:
 
