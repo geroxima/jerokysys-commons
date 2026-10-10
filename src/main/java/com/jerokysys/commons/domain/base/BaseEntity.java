@@ -9,10 +9,12 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
+import org.hibernate.annotations.SQLRestriction;
 import lombok.Getter;
 import lombok.Setter;
 
 @MappedSuperclass
+@SQLRestriction("deleted = false")
 @Getter
 @Setter
 public abstract class BaseEntity {
