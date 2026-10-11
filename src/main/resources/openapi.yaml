@@ -8,7 +8,6 @@ paths: {}
 
 components:
   schemas:
-
     # ============================================================
     # PERSON
     # ============================================================
@@ -41,14 +40,13 @@ components:
         - firstName
         - lastName
 
-
     # ============================================================
     # STUDENT
     # ============================================================
 
     StudentDTO:
       allOf:
-        - $ref: '#/components/schemas/PersonDTO'
+        - $ref: "#/components/schemas/PersonDTO"
         - type: object
           properties:
             birthDate:
@@ -61,15 +59,13 @@ components:
           required:
             - birthDate
 
-
     # ============================================================
     # INSTRUCTOR
     # ============================================================
 
     InstructorDTO:
       allOf:
-        - $ref: '#/components/schemas/PersonDTO'
-
+        - $ref: "#/components/schemas/PersonDTO"
 
     # ============================================================
     # GUARDIAN
@@ -77,13 +73,12 @@ components:
 
     GuardianDTO:
       allOf:
-        - $ref: '#/components/schemas/PersonDTO'
+        - $ref: "#/components/schemas/PersonDTO"
         - type: object
           properties:
             relationship:
               type: string
               maxLength: 50
-
 
     # ============================================================
     # DISCIPLINE
@@ -106,7 +101,6 @@ components:
 
       required:
         - name
-
 
     # ============================================================
     # DANCE CLASS
@@ -148,7 +142,7 @@ components:
           type: number
 
         status:
-          $ref: '#/components/schemas/ClassStatus'
+          $ref: "#/components/schemas/ClassStatus"
 
       required:
         - disciplineId
@@ -158,7 +152,6 @@ components:
         - endTime
         - maxCapacity
         - monthlyPrice
-
 
     # ============================================================
     # ENROLLMENT
@@ -188,7 +181,7 @@ components:
           type: number
 
         status:
-          $ref: '#/components/schemas/EnrollmentStatus'
+          $ref: "#/components/schemas/EnrollmentStatus"
 
       required:
         - studentId
@@ -224,7 +217,6 @@ components:
         - examName
         - examDate
 
-
     # ============================================================
     # EXAM RESULT
     # ============================================================
@@ -250,10 +242,6 @@ components:
 
         remarks:
           type: string
-
-      required:
-        - examId
-        - studentId
 
     # ============================================================
     # INVOICE DETAIL
@@ -328,7 +316,7 @@ components:
           format: date
 
         saleCondition:
-          $ref: '#/components/schemas/SaleCondition'
+          $ref: "#/components/schemas/SaleCondition"
 
         totalAmount:
           type: number
@@ -337,12 +325,12 @@ components:
           type: number
 
         paymentStatus:
-          $ref: '#/components/schemas/InvoiceStatus'
+          $ref: "#/components/schemas/InvoiceStatus"
 
         details:
           type: array
           items:
-            $ref: '#/components/schemas/InvoiceDetailDTO'
+            $ref: "#/components/schemas/InvoiceDetailDTO"
 
       required:
         - studentId
@@ -415,7 +403,7 @@ components:
         details:
           type: array
           items:
-            $ref: '#/components/schemas/InstructorPaymentDetailDTO'
+            $ref: "#/components/schemas/InstructorPaymentDetailDTO"
 
       required:
         - instructorId
