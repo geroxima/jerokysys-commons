@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 public class Response<T> {
     private T data;
     private String message;
+    private String code;
     private int status;
     private boolean success;
 
@@ -52,9 +53,14 @@ public class Response<T> {
     }
 
     public static <T> Response<T> error(String message, int status) {
+        return error(null, message, status);
+    }
+
+    public static <T> Response<T> error(String code, String message, int status) {
         return Response.<T>builder()
                 .data(null)
                 .message(message)
+                .code(code)
                 .status(status)
                 .success(false)
                 .build();
