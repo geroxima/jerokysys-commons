@@ -318,3 +318,50 @@ databaseChangeLog:
               ALTER TABLE instructor_payments ADD COLUMN IF NOT EXISTS deleted boolean NOT NULL DEFAULT false;
               ALTER TABLE instructor_payment_details ADD COLUMN IF NOT EXISTS active boolean NOT NULL DEFAULT true;
               ALTER TABLE instructor_payment_details ADD COLUMN IF NOT EXISTS deleted boolean NOT NULL DEFAULT false;
+
+  # 5. Esquema del microservicio de autenticacion (propiedad de jerokysys-auth)
+  - changeSet:
+      id: 15-create-auth-schema
+      author: alan
+      changes:
+        - sql:
+            splitStatements: true
+            sql: CREATE SCHEMA IF NOT EXISTS auth;
+
+  # 6. Tabla de usuarios, propiedad del microservicio jerokysys-auth
+  - changeSet:
+      id: 16-create-auth-users
+      author: alan
+      changes:
+        - createTable:
+            tableName: users
+            schemaName: auth
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints: { primaryKey: true, nullable: false }
+              - column: { name: username, type: varchar(100), constraints: { nullable: false, unique: true } }
+              - column: { name: password_hash, type: varchar(100), constraints: { nullable: false } }
+              - column: { name: role, type: varchar(20), constraints: { nullable: false } }
+              - column: { name: created_at, type: timestamp, constraints: { nullable: false } }
+              - column: { name: active, type: boolean, defaultValueBoolean: true, constraints: { nullable: false } }
+              - column: { name: deleted, type: boolean, defaultValueBoolean: false, constraints: { nullable: false } }
+
+  # 7. ADMIN inicial para poder operar el servicio desde el primer arranque.
+  #    Usuario: admin   Password: admin123   (CAMBIARLO en produccion con PUT /users/{id})
+  - changeSet:
+      id: 17-seed-admin
+      author: alan
+      changes:
+        - insert:
+            schemaName: auth
+            tableName: users
+            columns:
+              - column: { name: username, value: admin }
+              - column: { name: password_hash, value: "$2a$10$igCYzWEiZYzCZMWOQChLYuQf61fp9Mon0OZS7H.reEuu0UWZ2nF/e" }
+              - column: { name: role, value: ADMIN }
+              - column: { name: created_at, valueComputed: CURRENT_TIMESTAMP }
+              - column: { name: active, valueBoolean: true }
+              - column: { name: deleted, valueBoolean: false }
